@@ -4,7 +4,9 @@ import mongoose from 'mongoose'
 import multer from 'multer'
 import * as PostController from './controllers/PostController.js'
 import * as UserController from './controllers/UserCntroller.js'
+
 import checkAuth from './utils/checkAuth.js'
+import handleValidationErrors from './utils/handleValidationErrors.js'
 import {
 	loginValidation,
 	postCreateValidation,
@@ -41,14 +43,33 @@ app.get('/', (req, res) => {
 	res.send('hello world!')
 })
 
-app.post('/auth/login', loginValidation, UserController.login)
-app.get('/auth/me', checkAuth, UserController.getMe)
-app.post('/auth/register', registerValidation, UserController.register)
+app.post(
+	'/auth/login',
+	loginValidation,
+	handleValidationErrors,
+	UserController.login
+)
+
+app.post(
+	'/auth/register',
+	registerValidation,
+	handleValidationErrors,
+	UserController.register
+)
 app.post('/posts', checkAuth, postCreateValidation, PostController.create)
+
+app.get('/auth/me', checkAuth, UserController.getMe)
+app.delete('/posts/:id', checkAuth, PostController.removeOne)
+app.patch(
+	'/posts/:id',
+	checkAuth,
+	postCreateValidation,
+	handleValidationErrors,
+	PostController.update
+)
+
 app.get('/posts', PostController.getAll)
 app.get('/posts/:id', PostController.getOne)
-app.delete('/posts/:id', checkAuth, PostController.removeOne)
-app.patch('/posts/:id', checkAuth, postCreateValidation, PostController.update)
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
 	res.json({
 		url: `/uploads/${req.file.originalname}`,
