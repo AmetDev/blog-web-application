@@ -28,6 +28,7 @@ export const register = async (req, res) => {
 			SECRET,
 			{ expiresIn: 30 }
 		)
+
 		const { passwordHash, ...userDoc } = user._doc
 		res.json({
 			...userDoc,
@@ -60,7 +61,7 @@ export const login = async (req, res) => {
 				_id: user._id,
 			},
 			SECRET,
-			{ expiresIn: 30 }
+			{ expiresIn: '30d' }
 		)
 		const { passwordHash, ...userDoc } = user._doc
 		res.json({
