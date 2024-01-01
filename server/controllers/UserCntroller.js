@@ -130,8 +130,8 @@ export const refresh = async (req, res) => {
 			refresh_tokenupdated,
 		})
 	} else {
-		console.log('срок действия сессии истекла', isUsedToken)
-		return res.json({ message: 'пройдите аутенфикацию заново' })
+		console.log('срок действия сессии истек', isUsedToken)
+		return res.json({ message: 'пройдите аутентификацию заново' })
 	}
 }
 
