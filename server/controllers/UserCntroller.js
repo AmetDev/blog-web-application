@@ -2,7 +2,9 @@ import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 import { validationResult } from 'express-validator'
 import jwt from 'jsonwebtoken'
+import TokenRefresh from '../models/TokenRefresh.js'
 import userModal from '../models/User.js'
+import { generateRefreshToken } from '../utils/authRefresh.js'
 dotenv.config({ path: './.env' })
 const SECRET = process.env.SECRET
 export const register = async (req, res) => {
@@ -26,7 +28,7 @@ export const register = async (req, res) => {
 				_id: user._id,
 			},
 			SECRET,
-			{ expiresIn: 30 }
+			{ expiresIn: '3m' }
 		)
 
 		const { passwordHash, ...userDoc } = user._doc
@@ -61,18 +63,75 @@ export const login = async (req, res) => {
 				_id: user._id,
 			},
 			SECRET,
-			{ expiresIn: '30d' }
+			{ expiresIn: '3m' }
 		)
+		const refresh_token = generateRefreshToken()
 		const { passwordHash, ...userDoc } = user._doc
+		let currentTime = new Date()
+
+		// Добавьте 60 дней к текущему времени
+		let expirationTime = new Date(
+			currentTime.getTime() + 60 * 24 * 60 * 60 * 1000
+		)
+
+		await TokenRefresh.findOneAndDelete({ userId: user._id })
+
+		const tokenDoc = await TokenRefresh.create({
+			tokenId: refresh_token.id,
+			userId: user._id,
+			expiresIn: expirationTime,
+		})
+
 		res.json({
 			...userDoc,
 			token,
+			tokenDoc,
 		})
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({
 			message: 'не удалось авторизоваться',
 		})
+	}
+}
+
+export const refresh = async (req, res) => {
+	const refresh_token = req.body.refresh_token
+	if (!refresh_token) {
+		return res.json({ message: 'отсутствует токен сессии' })
+	}
+	const isUsedToken = await TokenRefresh.findOne({ tokenId: refresh_token })
+	if (!isUsedToken) {
+		return res.json({ message: 'сессия истекла, авторизуйтесь' })
+	}
+	const refresh_tokenForUpdate = generateRefreshToken()
+	const currentTime = Math.floor(Date.now() / 1000)
+	let currentTime1 = new Date()
+	let expirationTime = new Date(
+		currentTime1.getTime() + 60 * 24 * 60 * 60 * 1000
+	)
+	if (isUsedToken && currentTime < isUsedToken.expiresIn) {
+		await TokenRefresh.findOneAndDelete({ userId: isUsedToken.userId })
+		const token = jwt.sign(
+			{
+				_id: isUsedToken.userId,
+			},
+			SECRET,
+			{ expiresIn: '3m' }
+		)
+
+		const refresh_tokenupdated = await TokenRefresh.create({
+			tokenId: refresh_tokenForUpdate.id,
+			userId: isUsedToken.userId,
+			expiresIn: expirationTime,
+		})
+		res.json({
+			token,
+			refresh_tokenupdated,
+		})
+	} else {
+		console.log('срок действия сессии истекла', isUsedToken)
+		return res.json({ message: 'пройдите аутенфикацию заново' })
 	}
 }
 

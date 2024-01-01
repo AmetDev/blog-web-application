@@ -47,7 +47,7 @@ app.post(
 	handleValidationErrors,
 	UserController.login
 )
-
+app.post('/refresh', UserController.refresh)
 app.post(
 	'/auth/register',
 	registerValidation,
