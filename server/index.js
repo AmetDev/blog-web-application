@@ -5,6 +5,7 @@ import multer from 'multer'
 import * as PostController from './controllers/PostController.js'
 import * as UserController from './controllers/UserCntroller.js'
 
+import cors from 'cors'
 import checkAuth from './utils/checkAuth.js'
 import handleValidationErrors from './utils/handleValidationErrors.js'
 import {
@@ -13,11 +14,12 @@ import {
 	registerValidation,
 } from './validations/validation.js'
 dotenv.config({ path: './.env' })
+
 const PORT = process.env.PORT || 5000
 
 const app = express()
 app.use(express.json())
-
+app.use(cors())
 const storage = multer.diskStorage({
 	destination: (_, __, cb) => {
 		cb(null, 'uploads')

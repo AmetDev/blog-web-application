@@ -28,7 +28,7 @@ export const register = async (req, res) => {
 				_id: user._id,
 			},
 			SECRET,
-			{ expiresIn: '3m' }
+			{ expiresIn: '30m' }
 		)
 
 		const { passwordHash, ...userDoc } = user._doc
@@ -63,7 +63,7 @@ export const login = async (req, res) => {
 				_id: user._id,
 			},
 			SECRET,
-			{ expiresIn: '3m' }
+			{ expiresIn: '30m' }
 		)
 		const refresh_token = generateRefreshToken()
 		const { passwordHash, ...userDoc } = user._doc
@@ -117,7 +117,7 @@ export const refresh = async (req, res) => {
 				_id: isUsedToken.userId,
 			},
 			SECRET,
-			{ expiresIn: '3m' }
+			{ expiresIn: '30m' }
 		)
 
 		const refresh_tokenupdated = await TokenRefresh.create({
