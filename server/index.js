@@ -57,7 +57,7 @@ app.post(
 	UserController.register
 )
 app.post('/posts', checkAuth, postCreateValidation, PostController.create)
-
+app.get('/posts/tags', PostController.getLastTags)
 app.get('/auth/me', checkAuth, UserController.getMe)
 app.delete('/posts/:id', checkAuth, PostController.removeOne)
 app.patch(

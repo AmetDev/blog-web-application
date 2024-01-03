@@ -31,6 +31,7 @@ export const getAll = async (req, res) => {
 
 export const getOne = async (req, res) => {
 	try {
+		console.log(req.params.id)
 		const postId = req.params.id
 		const doc = await PostModel.findOneAndUpdate(
 			{
@@ -88,5 +89,20 @@ export const update = async (req, res) => {
 	} catch (error) {
 		console.log(error)
 		return res.status(500).json('Не удалось обновить статью')
+	}
+}
+
+export const getLastTags = async (req, res) => {
+	try {
+		const posts = await PostModel.find().limit(5).exec()
+
+		const tags = posts
+			.map(obj => obj.tags)
+			.flat()
+			.slice(0, 5)
+		return res.json(tags)
+	} catch (error) {
+		console.log(error)
+		return res.status(400).json('Статьи не найдены')
 	}
 }
