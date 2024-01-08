@@ -1,23 +1,36 @@
 import Grid from '@mui/material/Grid'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
-import React, { useEffect } from 'react'
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { CommentsBlock } from '../components/CommentsBlock'
 import { Post } from '../components/Post'
 import { TagsBlock } from '../components/TagsBlock'
 import { fetchPosts, fetchTags } from '../redux/slices/posts'
-
 export const Home = () => {
 	const dispatch = useDispatch()
+	const [currentId, setCurrentId] = useState('')
+	const userData = useSelector(state => state.auth)
 	const { posts, tags } = useSelector(state => state.posts)
 	const isPostsLoading = posts.status === 'loading'
+	console.log(currentId)
 	const isTagsLoading = tags.status === 'loading'
 	useEffect(() => {
 		dispatch(fetchPosts())
 		dispatch(fetchTags())
+		const someAsyncFunc = async () => {
+			try {
+				const token = await window.localStorage.getItem('token')
+				const { data } = await axios.get('http://localhost:4444/auth/me', {
+					headers: { Authorization: `Bearer ${token}` },
+				})
+				setCurrentId(data.userData._id)
+			} catch (error) {}
+		}
+		someAsyncFunc()
 	}, [])
-	console.log(posts)
+
 	return (
 		<>
 			<Tabs
@@ -39,13 +52,14 @@ export const Home = () => {
 								_id={obj._id}
 								isLoading={false}
 								title={obj.title}
-								imageUrl={obj.imageUrl || ''}
+								imageUrl={'http://localhost:4444' + obj.imageUrl || ''}
 								user={obj.user}
 								createdAt={obj.createdAt}
 								viewsCount={obj.viewsCount}
 								commentsCount={3}
-								tags={['react', 'fun', 'typescript']}
-								isEditable
+								//isEditable={true}
+								isEditable={currentId === obj.user._id}
+								tags={obj.tags}
 							/>
 						)
 					)}

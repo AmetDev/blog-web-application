@@ -43,7 +43,7 @@ export const getOne = async (req, res) => {
 			{
 				returnDocument: 'after',
 			}
-		)
+		).populate('user')
 		if (!doc) {
 			res.status(404).json({ message: 'Статья не найдена' })
 		} else {

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 
 import axios from 'axios'
+import ReactMarkDown from 'react-markdown'
 import { useParams } from 'react-router-dom'
 import { Index } from '../components/AddComment'
 import { CommentsBlock } from '../components/CommentsBlock'
 import { Post } from '../components/Post'
+
 export const FullPost = () => {
 	const { id } = useParams()
 	console.log(id)
@@ -15,6 +17,7 @@ export const FullPost = () => {
 			try {
 				const { data } = await axios.get(`http://localhost:4444/posts/${id}`)
 				setData(data)
+				console.log(data)
 				setIsLoading(false)
 			} catch (error) {
 				console.warn(error)
@@ -31,7 +34,7 @@ export const FullPost = () => {
 			<Post
 				id={data._id}
 				title={data.title}
-				imageUrl={data.imageUrl || ''}
+				imageUrl={'http://localhost:4444' + data.imageUrl || ''}
 				user={data.user}
 				createdAt={data.createdAt}
 				viewsCount={data.viewsCount}
@@ -39,7 +42,8 @@ export const FullPost = () => {
 				tags={data.tags}
 				isFullPost
 			>
-				<p>{data.text}</p>
+				<ReactMarkDown children={data.text} />
+				{/* <p>{data.text}</p> */}
 			</Post>
 			<CommentsBlock
 				items={[
